@@ -44,6 +44,13 @@ def cleanup_obsolte_states(args):
     for blob in blobs:
         if blob.name.endswith('.tfstate'):
             if blob.name not in repo_actual_blobs:
+                if args.download:
+                    data = blob.download_as_string()
+                    filepath = os.path.join(args.download, blob.name)
+                    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+                    open(filepath, 'wb').write(data)
+                    os.utime(filepath, (blob.time_created.timestamp(), blob.time_created.timestamp()))
+
                 if args.dryrun:
                     print('Obsolete state: "%s" (created: %s)' % (blob.name, blob.time_created.date()))
                 elif args.noconfirm:
@@ -90,6 +97,8 @@ def main():
     cleanup.add_argument('--cleanup-obsolete', '-o', action='store_true', help='Cleanup obsolete (no respecting directory in tf-infra-gcp repo) state files')
     cleanup.add_argument('--cleanup-extra', '-x', action='store_true', help='Cleanup extra objects (different to state files)')
     cleanup.add_argument('--cleanup-all', '-a', action='store_true', help='Apply all cleanup (default)')
+    misc = parser.add_argument_group(title='Misc options')
+    misc.add_argument('--download', '-d', action='store', help='Download obsolete state files to the directory')
     args = parser.parse_args(sys.argv[1:])
 
     if args.cleanup_all:
