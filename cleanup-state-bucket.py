@@ -20,7 +20,7 @@ def cleanup_empty_states(args):
                     blob.delete()
                     print('Empty state "%s" (created: %s) deleted' % (blob.name, blob.time_created.date()))
                 else:
-                    confirm = input('Delete empty state "%s" (created: %s) [y/N]?' % (blob.name, blob.time_created.date())).lower()
+                    confirm = input('Delete empty state "%s" (created: %s) [y/N]? ' % (blob.name, blob.time_created.date())).lower()
                     if confirm == 'y':
                         blob.delete()
                         print('Deleted')
@@ -54,7 +54,7 @@ def cleanup_obsolte_states(args):
                     blob.delete()
                     print('Obsolete state "%s" (created: %s) deleted' % (blob.name, blob.time_created.date()))
                 else:
-                    confirm = input('Delete obsolete state "%s" (created: %s) [y/N]?' % (blob.name, blob.time_created.date())).lower()
+                    confirm = input('Delete obsolete state "%s" (created: %s) [y/N]? ' % (blob.name, blob.time_created.date())).lower()
                     if confirm == 'y':
                         blob.delete()
                         print('Deleted')
@@ -74,7 +74,7 @@ def cleanup_extra_objects(args):
                 print('Extra object "%s" (created: %s) deleted' % (blob.name, blob.time_created.date()))
             else:
                 confirm = input(
-                    'Delete extra object "%s" (created: %s) [y/N]?' % (blob.name, blob.time_created.date())).lower()
+                    'Delete extra object "%s" (created: %s) [y/N]? ' % (blob.name, blob.time_created.date())).lower()
                 if confirm == 'y':
                     blob.delete()
                     print('Deleted')
