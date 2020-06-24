@@ -91,7 +91,7 @@ def main():
     parser.add_argument('--repo', '-r', action='store', help='Path to tf-infra-gcp repo', default=os.path.abspath(os.path.join(scriptdir, '../../../')))
     cleanup = parser.add_argument_group(title='Cleanup options')
     cleanup.add_argument('--cleanup-empty', '-e', action='store_true', help='Cleanup empty ("resources": []) state files')
-    cleanup.add_argument('--cleanup-obsolete', '-w', action='store_true', help='Cleanup obsolete (no respecting directory in tf-infra-gcp repo) state files')
+    cleanup.add_argument('--cleanup-obsolete', '-o', action='store_true', help='Cleanup obsolete (no respecting directory in tf-infra-gcp repo) state files')
     cleanup.add_argument('--cleanup-extra', '-x', action='store_true', help='Cleanup extra objects (different to state files)')
     cleanup.add_argument('--cleanup-all', '-a', action='store_true', help='Apply all cleanup (default)')
     args = parser.parse_args(sys.argv[1:])
