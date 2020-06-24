@@ -51,6 +51,16 @@ def cleanup_obsolte_states(args):
                     open(filepath, 'wb').write(data)
                     os.utime(filepath, (blob.time_created.timestamp(), blob.time_created.timestamp()))
 
+                    if args.check_no_instances:
+                        no_instances = True
+                        jdata = json.loads(data)
+                        for res in jdata['resources']:
+                            if res['instances']:
+                                no_instances = False
+                                break
+                        if no_instances:
+                            print('Has no instances: "%s" (created: %s)' % (blob.name, blob.time_created.date()))
+
                 if args.dryrun:
                     print('Obsolete state: "%s" (created: %s)' % (blob.name, blob.time_created.date()))
                 elif args.noconfirm:
@@ -99,6 +109,7 @@ def main():
     cleanup.add_argument('--cleanup-all', '-a', action='store_true', help='Apply all cleanup (default)')
     misc = parser.add_argument_group(title='Misc options')
     misc.add_argument('--download', '-d', action='store', help='Download obsolete state files to the directory')
+    misc.add_argument('--check-no-instances', '-i', action='store_true', help='Check downloaded files for empty instances (with only schema)')
     args = parser.parse_args(sys.argv[1:])
 
     if args.cleanup_all:
