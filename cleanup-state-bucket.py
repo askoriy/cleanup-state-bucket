@@ -30,11 +30,7 @@ def cleanup_empty_states(args):
 
 def cleanup_obsolte_states(args):
     repo_actual_blobs = []
-    organizaiton = {
-        'platform-tf-admin-dev': 'extenda-io',
-        'platform-tf-admin-prod': 'extendaretail-com'
-    }
-    start_path = os.path.join(args.repo, 'organization', organizaiton.get(args.bucket))
+    start_path = os.path.join(args.repo, 'organization')
     for root, dirs, files in os.walk(start_path):
         if '.terragrunt-cache' not in root:
             is_tf_directory = filter(lambda f: f.endswith('.hcl'), files)
@@ -88,7 +84,7 @@ def main():
     parser.add_argument('--dryrun', '-n', action='store_true', help="Don't delete state files, just print it")
     parser.add_argument('--noconfirm', '-y', action='store_true', help="Don't ask confirmation for every object (automatically yes)")
     parser.add_argument('--bucket', '-b', action='store', help='GCP bucket to cleanup', default='platform-tf-admin-prod')
-    parser.add_argument('--repo', '-r', action='store', help='Path to tf-infra-gcp repo', default=os.path.abspath(os.path.join(scriptdir, '../../../')))
+    parser.add_argument('--repo', '-r', action='store', help='Path to tf-infra-gcp repo', default=os.path.abspath(os.path.join(scriptdir, '.')))
     cleanup = parser.add_argument_group(title='Cleanup options')
     cleanup.add_argument('--cleanup-empty', '-e', action='store_true', help='Cleanup empty ("resources": []) state files')
     cleanup.add_argument('--cleanup-obsolete', '-o', action='store_true', help='Cleanup obsolete (no respecting directory in tf-infra-gcp repo) state files')
