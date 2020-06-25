@@ -28,7 +28,7 @@ def cleanup_empty_states(args):
                         print('Skipped')
 
 
-def cleanup_obsolte_states(args):
+def cleanup_orphan_states(args):
     repo_actual_blobs = []
     start_path = os.path.join(args.repo, 'organization')
     for root, dirs, files in os.walk(start_path):
@@ -62,12 +62,12 @@ def cleanup_obsolte_states(args):
                             print('Has no instances: "%s" (created: %s)' % (blob.name, blob.time_created.date()))
 
                 if args.dryrun:
-                    print('Obsolete state: "%s" (created: %s)' % (blob.name, blob.time_created.date()))
+                    print('Orphan state: "%s" (created: %s)' % (blob.name, blob.time_created.date()))
                 elif args.noconfirm:
                     blob.delete()
-                    print('Obsolete state "%s" (created: %s) deleted' % (blob.name, blob.time_created.date()))
+                    print('Orphan state "%s" (created: %s) deleted' % (blob.name, blob.time_created.date()))
                 else:
-                    confirm = input('Delete obsolete state "%s" (created: %s) [y/N]? ' % (blob.name, blob.time_created.date())).lower()
+                    confirm = input('Delete orphan state "%s" (created: %s) [y/N]? ' % (blob.name, blob.time_created.date())).lower()
                     if confirm == 'y':
                         blob.delete()
                         print('Deleted')
@@ -104,27 +104,27 @@ def main():
     parser.add_argument('--repo', '-r', action='store', help='Path to tf-infra-gcp repo', default=os.path.abspath(os.path.join(scriptdir, '.')))
     cleanup = parser.add_argument_group(title='Cleanup options')
     cleanup.add_argument('--cleanup-empty', '-e', action='store_true', help='Cleanup empty ("resources": []) state files')
-    cleanup.add_argument('--cleanup-obsolete', '-o', action='store_true', help='Cleanup obsolete (no respecting directory in tf-infra-gcp repo) state files')
+    cleanup.add_argument('--cleanup-orphan', '-o', action='store_true', help='Cleanup orphan (no respecting directory in tf-infra-gcp repo) state files')
     cleanup.add_argument('--cleanup-extra', '-x', action='store_true', help='Cleanup extra objects (different to state files)')
     cleanup.add_argument('--cleanup-all', '-a', action='store_true', help='Apply all cleanup (default)')
     misc = parser.add_argument_group(title='Misc options')
-    misc.add_argument('--download', '-d', action='store', help='Download obsolete state files to the directory')
+    misc.add_argument('--download', '-d', action='store', help='Download orphan state files to the directory')
     misc.add_argument('--check-no-instances', '-i', action='store_true', help='Check downloaded files for empty instances (with only schema)')
     args = parser.parse_args(sys.argv[1:])
 
     if args.cleanup_all:
         args.cleanup_empty = True
-        args.cleanup_obsolete = True
+        args.cleanup_orphan = True
         args.cleanup_extra = True
 
-    if (not args.cleanup_empty and not args.cleanup_obsolete and not args.cleanup_extra):
+    if (not args.cleanup_empty and not args.cleanup_orphan and not args.cleanup_extra):
         parser.print_help()
         sys.exit(1)
 
     if args.cleanup_empty:
         cleanup_empty_states(args)
-    if args.cleanup_obsolete:
-        cleanup_obsolte_states(args)
+    if args.cleanup_orphan:
+        cleanup_orphan_states(args)
     if args.cleanup_extra:
         cleanup_extra_objects(args)
 
