@@ -99,8 +99,8 @@ def main():
     parser = argparse.ArgumentParser(description='Cleanup terragrunt state GCP bucket', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--dryrun', '-n', action='store_true', help="Don't delete state files, just print it")
     parser.add_argument('--noconfirm', '-y', action='store_true', help="Don't ask confirmation for every object (automatically yes)")
-    parser.add_argument('--bucket', '-b', action='store', help='GCP bucket to cleanup', default='platform-tf-admin-prod')
-    parser.add_argument('--root', '-r', action='store', help='Path to terragrunt root folder', default='organization')
+    parser.add_argument('--bucket', '-b', action='store', help='GCP bucket to cleanup', default='')
+    parser.add_argument('--root', '-r', action='store', help='Path to terragrunt root folder', default='')
     parser.add_argument('--suffix', '-s', action='store', help="Suffix added to terraform state onject path", default='')
     cleanup = parser.add_argument_group(title='Cleanup options')
     cleanup.add_argument('--cleanup-empty', '-e', action='store_true', help='Cleanup empty ("resources": []) state files')
@@ -110,7 +110,26 @@ def main():
     misc = parser.add_argument_group(title='Misc options')
     misc.add_argument('--download', '-d', action='store', help='Download orphan state files to the directory')
     misc.add_argument('--check-no-instances', '-i', action='store_true', help='Check downloaded files for empty instances (with only schema)')
+    templates = parser.add_argument_group(title='Configuration templates')
+    template_choice = templates.add_mutually_exclusive_group()
+    template_choice.add_argument('--tf-infra-gcp', action='store_true', help="Apply configuration for tf-infra-gcp repo")
+    template_choice.add_argument('--common-staging', action='store_true', help="Apply configuration for *-common repo staging bucket")
+    template_choice.add_argument('--common-prod', action='store_true', help="Apply configuration for *-common repo prod bucket")
     args = parser.parse_args(sys.argv[1:])
+
+    if args.tf_infra_gcp:
+        args.bucket = 'platform-tf-admin-prod'
+        args.root = 'organization'
+
+    elif args.common_staging:
+        args.bucket = 'tf-state-%s-staging' % os.path.basename(os.getcwd()).replace('-common','')
+        args.root = 'infra'
+        args.suffix = 'terraform.tfstate'
+
+    elif args.common_prod:
+        args.bucket = 'tf-state-%s-prod' % os.path.basename(os.getcwd()).replace('-common','')
+        args.root = 'infra'
+        args.suffix = 'terraform.tfstate'
 
     if args.cleanup_all:
         args.cleanup_empty = True
