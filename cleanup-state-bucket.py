@@ -11,16 +11,17 @@ def cleanup_empty_states(args):
     storage_client = storage.Client()
     blobs = storage_client.list_blobs(args.bucket)
     for blob in blobs:
+        blob_name = "gs://%s/%s" % (args.bucket, blob.name) if args.show_uri else blob.name
         if blob.name.endswith('.tfstate') and blob.size < 200: # typicaly empty state file size is 157-159 bytes
             data = json.loads(blob.download_as_string())
             if not data['resources']:
                 if args.dryrun:
-                    print('Empty state: "%s" (created: %s)' % (blob.name, blob.time_created.date()))
+                    print('Empty state: "%s" (created: %s)' % (blob_name, blob.time_created.date()))
                 elif args.noconfirm:
                     blob.delete()
-                    print('Empty state "%s" (created: %s) deleted' % (blob.name, blob.time_created.date()))
+                    print('Empty state "%s" (created: %s) deleted' % (blob_name, blob.time_created.date()))
                 else:
-                    confirm = input('Delete empty state "%s" (created: %s) [y/N]? ' % (blob.name, blob.time_created.date())).lower()
+                    confirm = input('Delete empty state "%s" (created: %s) [y/N]? ' % (blob_name, blob.time_created.date())).lower()
                     if confirm == 'y':
                         blob.delete()
                         print('Deleted')
@@ -41,6 +42,7 @@ def cleanup_orphan_states(args):
     storage_client = storage.Client()
     blobs = storage_client.list_blobs(args.bucket)
     for blob in blobs:
+        blob_name = "gs://%s/%s" % (args.bucket, blob.name) if args.show_uri else blob.name
         if blob.name.endswith('.tfstate'):
             if blob.name not in repo_actual_blobs:
                 if args.download:
@@ -58,15 +60,15 @@ def cleanup_orphan_states(args):
                                 no_instances = False
                                 break
                         if no_instances:
-                            print('Has no instances: "%s" (created: %s)' % (blob.name, blob.time_created.date()))
+                            print('Has no instances: "%s" (created: %s)' % (blob_name, blob.time_created.date()))
 
                 if args.dryrun:
-                    print('Orphan state: "%s" (created: %s)' % (blob.name, blob.time_created.date()))
+                    print('Orphan state: "%s" (created: %s)' % (blob_name, blob.time_created.date()))
                 elif args.noconfirm:
                     blob.delete()
-                    print('Orphan state "%s" (created: %s) deleted' % (blob.name, blob.time_created.date()))
+                    print('Orphan state "%s" (created: %s) deleted' % (blob_name, blob.time_created.date()))
                 else:
-                    confirm = input('Delete orphan state "%s" (created: %s) [y/N]? ' % (blob.name, blob.time_created.date())).lower()
+                    confirm = input('Delete orphan state "%s" (created: %s) [y/N]? ' % (blob_name, blob.time_created.date())).lower()
                     if confirm == 'y':
                         blob.delete()
                         print('Deleted')
@@ -78,15 +80,16 @@ def cleanup_extra_objects(args):
     storage_client = storage.Client()
     blobs = storage_client.list_blobs(args.bucket)
     for blob in blobs:
+        blob_name = "gs://%s/%s" % (args.bucket, blob.name) if args.show_uri else blob.name
         if not blob.name.endswith('.tfstate'):
             if args.dryrun:
-                print('Extra object: "%s" (created: %s)' % (blob.name, blob.time_created.date()))
+                print('Extra object: "%s" (created: %s)' % (blob_name, blob.time_created.date()))
             elif args.noconfirm:
                 blob.delete()
-                print('Extra object "%s" (created: %s) deleted' % (blob.name, blob.time_created.date()))
+                print('Extra object "%s" (created: %s) deleted' % (blob_name, blob.time_created.date()))
             else:
                 confirm = input(
-                    'Delete extra object "%s" (created: %s) [y/N]? ' % (blob.name, blob.time_created.date())).lower()
+                    'Delete extra object "%s" (created: %s) [y/N]? ' % (blob_name, blob.time_created.date())).lower()
                 if confirm == 'y':
                     blob.delete()
                     print('Deleted')
@@ -110,6 +113,7 @@ def main():
     misc = parser.add_argument_group(title='Misc options')
     misc.add_argument('--download', '-d', action='store', help='Download orphan state files to the directory')
     misc.add_argument('--check-no-instances', '-i', action='store_true', help='Check downloaded files for empty instances (with only schema)')
+    misc.add_argument('--show-uri', '-u', action='store_true', help="Display full uri (gs://*) to the objects")
     templates = parser.add_argument_group(title='Configuration templates')
     template_choice = templates.add_mutually_exclusive_group()
     template_choice.add_argument('--tf-infra-gcp', action='store_true', help="Apply configuration for tf-infra-gcp repo")
