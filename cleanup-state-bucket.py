@@ -35,7 +35,7 @@ def cleanup_orphan_states(args):
             is_tf_directory = filter(lambda f: f.endswith('.hcl'), files)
             if is_tf_directory:
                 tf_directory = root.replace(args.root,'').strip('/')
-                blob_name = os.path.join(tf_directory, 'default.tfstate')
+                blob_name = os.path.join(tf_directory, args.suffix, 'default.tfstate')
                 repo_actual_blobs.append(blob_name)
 
     storage_client = storage.Client()
@@ -101,6 +101,7 @@ def main():
     parser.add_argument('--noconfirm', '-y', action='store_true', help="Don't ask confirmation for every object (automatically yes)")
     parser.add_argument('--bucket', '-b', action='store', help='GCP bucket to cleanup', default='platform-tf-admin-prod')
     parser.add_argument('--root', '-r', action='store', help='Path to terragrunt root folder', default='organization')
+    parser.add_argument('--suffix', '-s', action='store', help="Suffix added to terraform state onject path", default='')
     cleanup = parser.add_argument_group(title='Cleanup options')
     cleanup.add_argument('--cleanup-empty', '-e', action='store_true', help='Cleanup empty ("resources": []) state files')
     cleanup.add_argument('--cleanup-orphan', '-o', action='store_true', help='Cleanup orphan (no respecting directory in terragrunt repo) state files')
