@@ -137,6 +137,7 @@ def main():
         args.cleanup_extra = True
 
     if (not args.cleanup_empty and not args.cleanup_orphan and not args.cleanup_extra):
+        print('Error. No Cleanup options specified')
         parser.print_help()
         sys.exit(1)
 
