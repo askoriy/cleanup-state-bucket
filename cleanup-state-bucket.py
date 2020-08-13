@@ -126,14 +126,20 @@ def main():
         args.root = 'organization'
 
     elif args.common_staging:
-        args.bucket = 'tf-state-%s-staging' % os.path.basename(os.getcwd()).replace('-common','')
-        args.root = 'infra'
-        args.suffix = 'terraform.tfstate'
+        if not args.bucket:
+            args.bucket = 'tf-state-%s-staging' % os.path.basename(os.getcwd()).replace('-common','')
+        if not args.root:
+            args.root = 'infra'
+        if not args.suffix:
+            args.suffix = 'terraform.tfstate'
 
     elif args.common_prod:
-        args.bucket = 'tf-state-%s-prod' % os.path.basename(os.getcwd()).replace('-common','')
-        args.root = 'infra'
-        args.suffix = 'terraform.tfstate'
+        if not args.bucket:
+            args.bucket = 'tf-state-%s-prod' % os.path.basename(os.getcwd()).replace('-common','')
+        if not args.root:
+            args.root = 'infra'
+        if not args.suffix:
+            args.suffix = 'terraform.tfstate'
 
     if args.cleanup_all:
         args.cleanup_empty = True
